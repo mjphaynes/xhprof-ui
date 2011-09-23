@@ -15,45 +15,45 @@
 		<link rel="stylesheet" href="/css/xhprof.css">
 	</head>
 	<body>
-	  <div class="topbar-wrapper" style="z-index:5;">
-	    <div class="topbar" data-dropdown="dropdown" >
-	      <div class="topbar-inner">
-	        <div class="container">
-	          <h3><a href="#">XHProf Reporting</a></h3>
+		<div class="topbar-wrapper" style="z-index:5;">
+			<div class="topbar" data-dropdown="dropdown" >
+				<div class="topbar-inner">
+					<div class="container">
+						<h3><a href="#">XHProf Reporting</a></h3>
 
-	          <ul class="nav">
-	            <li class="active"><a href="#">Home</a></li>
-	            <li><a href="#">Link</a></li>
-	            <li><a href="#">Live Reporting</a></li>
-	            <li class="dropdown">
-	              <a href="#" class="dropdown-toggle">Options</a>
+						<ul class="nav">
+							<li class="active"><a href="#">Home</a></li>
+							<li><a href="#">Link</a></li>
+							<li><a href="#">Live Reporting</a></li>
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle">Options</a>
 
-	              <ul class="dropdown-menu">
-	                <li><a href="#">Secondary link</a></li>
-	                <li><a href="#">Something else here</a></li>
-	                <li class="divider"></li>
-	                <li><a href="#">Another link</a></li>
-	              </ul>
-	            </li>
+								<ul class="dropdown-menu">
+									<li><a href="#">Secondary link</a></li>
+									<li><a href="#">Something else here</a></li>
+									<li class="divider"></li>
+									<li><a href="#">Another link</a></li>
+								</ul>
+							</li>
 
-	          </ul>
-	          <form class="pull-left" action="">
-	            <input type="text" placeholder="Search" />
-	          </form>
-	          <ul class="nav secondary-nav">
-	            <li class="dropdown">
-	              <a href="#" class="dropdown-toggle">Settings</a>
-	              <ul class="dropdown-menu">
+						</ul>
+						<form class="pull-left" action="">
+							<input type="text" placeholder="Search" />
+						</form>
+						<ul class="nav secondary-nav">
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle">Settings</a>
+								<ul class="dropdown-menu">
 
-	                <li><a href="#">Secondary link</a></li>
-	                <li><a href="#">Something else here</a></li>
-	                <li class="divider"></li>
-	                <li><a href="#">Sign out</a></li>
-	              </ul>
-	            </li>
-	          </ul>
+									<li><a href="#">Secondary link</a></li>
+									<li><a href="#">Something else here</a></li>
+									<li class="divider"></li>
+									<li><a href="#">Sign out</a></li>
+								</ul>
+							</li>
+						</ul>
 
-	        </div>
-	      </div><!-- /topbar-inner -->
-	    </div><!-- /topbar -->
-	  </div><!-- /topbar-wrapper -->
+					</div>
+				</div><!-- /topbar-inner -->
+			</div><!-- /topbar -->
+		</div><!-- /topbar-wrapper -->
