@@ -1,21 +1,44 @@
 <?php 
 
-require_once XHPROF_ROOT.'/classes/xhprof_utils.php';
-require_once XHPROF_ROOT.'/classes/xhprof_config.php';
-require_once XHPROF_ROOT.'/classes/xhprof_metrics.php';
-require_once XHPROF_ROOT.'/classes/xhprof_report.php';
-
 class XHProf_UI {
 	
-	private $_params = array();
+	public $params = array();
+	public $dir = '';
 	
-	private $_dir = '';
+	public $config;
 	
-	private $_suffix = 'xhprof';
+	public $runs = array();
 	
-	function __construct($params, $dir = null) {
-		
-		$this->_params = XHProf_Utils::parse_params($params);
+	// default column to sort on -- wall time
+	public $sort = 'wt';
+
+	// default is 'single run' report
+	public $diff_mode = false;
+
+	// call count data present?
+	public $display_calls = true;
+
+	// drill to down to a fn
+	public $fn = null;
+
+	// columns that'll be displayed in a top-level report
+	public $stats = array();
+
+	// columns that'll be displayed in a function's parent/child report
+	public $pc_stats = array();
+
+	// Various total counts
+	public $totals   = null;
+	public $totals_1 = 0;
+	public $totals_2 = 0;
+
+	/*
+	* The subset of $possible_metrics that is present in the raw profile data.
+	*/
+	public $metrics = null;
+
+	function __construct($params, XHProf_UI\Config $config, $dir = null) {
+		$this->params = XHProf_UI\Utils::parse_params($params);
 		
 	    // if user hasn't passed a directory location,
 	    // we use the xhprof.output_dir ini setting
@@ -29,8 +52,9 @@ class XHProf_UI {
 				'You can either pass the directory location as an argument to the constructor or set xhprof.output_dir ini param.');
 		}
 
-		$this->_dir = $dir;
+		$this->config = $config;
 
+		$this->dir = $dir;
 	}
 	
 	/**
@@ -38,11 +62,7 @@ class XHProf_UI {
 	 *
 	 */
 	function generate_report() {
-		include XHPROF_ROOT.'/views/header.php';
-		
-		$config = new XHProf_Config();
-		
-		extract($this->_params, EXTR_SKIP);
+		extract($this->params, EXTR_SKIP);
 
 		// specific run to display?
 		if ($run) {
@@ -50,82 +70,131 @@ class XHProf_UI {
 			// that'll be aggregated. If "wts" (a comma separated list
 			// of integral weights is specified), the runs will be
 			// aggregated in that ratio.
-			$runs = explode(',', $run);
+			foreach (explode(',', $run) as $run_id) {
+				$this->runs[] = new XHProf_UI\Run($this->dir, $namespace, $run_id);
+			}
 
-			if (count($runs) == 1) {
-				$run_data = $this->get_run($runs[0], $source);
+			if (count($this->runs) == 1) {
+				if ($data = $this->runs[0]->get_data()) {
+					$this->_setup_metrics($data);
+
+					return new XHProf_UI\Report\Single(&$this, $data);
+				}
 
 			} else {
-				$wts = strlen($wts) > 0 ? explode(',', $wts) : null;
-				
-				$data = xhprof_aggregate_runs($xhprof_runs_impl, $runs_array, $wts_array, $source, false);
-				$xhprof_data = $data['raw'];
-				$description = $data['description'];
+				// $wts = strlen($wts) > 0 ? explode(',', $wts) : null;
+				// 
+				// $data = xhprof_aggregate_runs($xhprof_runs_impl, $runs_array, $wts_array, $source, false);
+				// $xhprof_data = $data['raw'];
+				// $description = $data['description'];
 			}
 
-			if ($run_data) {
-				$metrics = new XHProf_Metrics($config, $run_data, $symbol, $sort, false);
-
-				new XHProf_Report($config, $metrics, $this->_params, $symbol, $sort, $run_data);
-				include XHPROF_ROOT.'/views/footer.php';
-				return true;
-			}
 
 		// diff report for two runs
 		} else if ($run1 && $run2) {
 			$run_data1 = $this->get_run($run1, $source);
 			$run_data2 = $this->get_run($run2, $source);
 			
-			$metrics = new XHProf_Metrics($config, $run_data2, $symbol, $sort, true);
+			$metrics = new XHProf_UI\Metrics($config, $run_data2, $fn, $sort, true);
 
-			// profiler_diff_report($url_params, $xhprof_data1, $description1, $xhprof_data2, $description2, $symbol, $sort, $run1, $run2);
-			// init_metrics($xhprof_data2, $rep_symbol, $sort, true);
+			// profiler_diff_report($url_params, $xhprof_data1, $description1, $xhprof_data2, $description2, $fn, $sort, $run1, $run2);
+			// init_metrics($xhprof_data2, $rep_fn, $sort, true);
 			// profiler_report($url_params,$rep_symbol, $sort, $run1, $run1_desc, $xhprof_data1,$run2,$run2_desc,$xhprof_data2);
-			new XHProf_Report($config, $metrics, $this->_params, $symbol, $sort, $run_data1, $run_data2);
-			include XHPROF_ROOT.'/views/footer.php';
-			return true;
+			return new XHProf_Report($config, $metrics, $this->_params, $fn, $sort, $run_data1, $run_data2);
 		}
 
-		echo "No XHProf runs specified in the URL.";
-
-		$this->list_runs();
 
 		return false;
 	}
-
-	private function file_name($run_id, $source) {
-		return (!empty($this->_dir) ? "{$this->_dir}/" : '')."$run_id.$source";
-	}
 	
-	public function get_run($run_id, $source) {
-		if (!file_exists($file_name = $this->file_name($run_id, $source))) {
-			return null;
+	
+	public function url(array $params = array()) {
+		return '?'.http_build_query(array_filter(array_merge($this->params, $params)));
+	}
+
+
+
+	protected function _setup_metrics($data) {
+		extract($this->params, EXTR_SKIP);
+		
+		$this->fn = XHProf_UI\Utils::safe_fn($fn);
+
+		if (!empty($sort)) {
+			if (array_key_exists($sort, $this->config->sortable_columns)) {
+				$this->sort = $sort;
+			} else {
+				throw new Exception("Invalid Sort Key $sort specified in URL");
+			}
 		}
 
-		return array(
-			'run_id' => $run_id,
-			'source' => $source,
-			'description' => $source,
-			'xhprof_data' => unserialize(file_get_contents($file_name))
-		);
-	}
+		// For C++ profiler runs, walltime attribute isn't present.
+		// In that case, use "samples" as the default sort column.
+		if (!isset($data['main()']['wt'])) {
+			if ($this->sort == 'wt') {
+				$this->sort = 'samples';
+			}
 
-	public function list_runs() {
-		echo "<hr/>Existing runs:\n<ul>\n";
-
-		foreach (glob("{$this->_dir}/*") as $file) {
-			list($run, $source) = explode('.', basename($file));
-
-			echo '<li><a href="' . htmlentities($_SERVER['SCRIPT_NAME'])
-				. '?run=' . htmlentities($run) . '&source='
-				. htmlentities($source) . '">'
-				. htmlentities(basename($file)) . "</a><small> "
-				. date("Y-m-d H:i:s", filemtime($file)) . "</small></li>\n";
+			// C++ profiler data doesn't have call counts.
+			// ideally we should check to see if "ct" metric
+			// is present for "main()". But currently "ct"
+			// metric is artificially set to 1. So, relying
+			// on absence of "wt" metric instead.
+			$this->display_calls = false;
 		}
 
-		echo "</ul>\n";
+		// parent/child report doesn't support exclusive times yet.
+		// So, change sort hyperlinks to closest fit.
+		if (!empty($fn)) {
+			$this->sort = str_replace('excl_', '', $this->sort);
+		}
+
+		$this->pc_stats = $this->stats = $this->display_calls ? array('fn', 'ct') : array('fn');
+
+		foreach ($this->config->possible_metrics as $metric => $desc) {
+			if (isset($data['main()'][$metric])) {
+				$this->metrics[] = $metric;
+
+				// flat (top-level reports): we can compute
+				// exclusive metrics reports as well.
+				$this->stats[] = $metric;
+				// $this->stats[] = "I" . $desc[0] . "%";
+				$this->stats[] = "excl_" . $metric;
+				// $this->stats[] = "E" . $desc[0] . "%";
+
+				// parent/child report for a function: we can
+				// only breakdown inclusive times correctly.
+				$this->pc_stats[] = $metric;
+				// $this->pc_stats[] = "I" . $desc[0] . "%";
+			}
+		}
 	}
 
-	
+
+
+	/**
+	* Takes raw XHProf data that was aggregated over "$num_runs" number
+	* of runs averages/nomalizes the data. Essentially the various metrics
+	* collected are divided by $num_runs.
+	*/
+	protected function normalize_metrics($raw_data, $num_runs) {
+
+		if (empty($raw_data) || ($num_runs == 0)) {
+			return $raw_data;
+		}
+
+		$raw_data_total = array();
+
+		if (isset($raw_data["==>main()"]) && isset($raw_data["main()"])) {
+			xhprof_error("XHProf Error: both ==>main() and main() set in raw data...");
+		}
+
+		foreach ($raw_data as $parent_child => $info) {
+			foreach ($info as $metric => $value) {
+				$raw_data_total[$parent_child][$metric] = ($value / $num_runs);
+			}
+		}
+
+		return $raw_data_total;
+	}
 
 }

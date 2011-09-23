@@ -1,6 +1,10 @@
 
 body{padding:50px 10px 10px;}
 
+#no_xhprof{width:300px;margin:10% auto 0;text-align:center;}
+	#no_xhprof a{color:#fff;text-decoration:underline;}
+	#no_xhprof a:hover{text-decoration:none;}
+
 table#stats{width:100%;font-size:12px;}
 	table#stats thead th,table#stats tfoot th{font-size:10px;text-align:center;background-color:#eee;}
 	table#stats thead th.blue,table#stats tfoot th.blue{background-color:#ade6fe;}
@@ -10,6 +14,7 @@ table#stats{width:100%;font-size:12px;}
 	table#stats tbody td.right{text-align:right;}
 	table#stats tbody td.center{text-align:center;}
 	table#stats tbody td.fn{}
+	table#stats tbody tr+tr th{border-top:1px solid #ddd;}
 	
 
 
