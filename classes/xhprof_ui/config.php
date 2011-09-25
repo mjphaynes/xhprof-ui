@@ -102,32 +102,4 @@ class Config {
 		'ESamples%'    => array('XHProf_UI\Utils', 'percent_format'),
 	);
 
-	// Textual descriptions for column headers in 'diff' mode
-	public $diff_descriptions = array(
-		'fn'           => 'Function Name',
-		'ct'           => 'Calls Diff',
-		'Calls%'       => 'Calls Diff%',
-
-		'wt'           => 'Inc. Wall Diff (&micro;s)',
-		'excl_wt'      => 'Ex. Wall Diff (&micro;s)',
-
-		'ut'           => 'Inc. User Diff (&micro;s)',
-		'excl_ut'      => 'Ex. User Diff (&micro;s)',
-
-		'cpu'          => 'Inc. CPU Diff (&micro;s)',
-		'excl_cpu'     => 'Ex. CPU Diff (&micro;s)',
-
-		'st'           => 'Inc. Sys Diff (&micro;s)',
-		'excl_st'      => 'Ex. Sys Diff (&micro;s)',
-
-		'mu'           => 'Inc. MemUse Diff (bytes)',
-		'excl_mu'      => 'Ex. MemUse Diff (bytes)',
-
-		'pmu'          => 'Inc.  Peak MemUse Diff (bytes)',
-		'excl_pmu'     => 'Ex. Peak MemUse Diff (bytes)',
-
-		'samples'      => 'Inc. Samples Diff',
-		'excl_samples' => 'Ex. Samples Diff',
-	);
-
 }

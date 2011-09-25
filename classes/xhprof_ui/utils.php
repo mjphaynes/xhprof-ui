@@ -87,8 +87,7 @@ class Utils {
 		foreach (glob("{$dir}/*") as $file) {
 			list($run, $namespace) = explode('.', basename($file));
 
-			echo '<li><a href="'.htmlentities($_SERVER['SCRIPT_NAME']).'?run='.htmlentities($run).'&source='
-				. htmlentities($namespace) . '">'.htmlentities(basename($file)).'</a><small> '.date("Y-m-d H:i:s", filemtime($file))."</small></li>\n";
+			echo '<li><a href="?run='.htmlentities($run).'&namespace='.htmlentities($namespace).'">'.htmlentities(basename($file)).'</a><small> '.date("Y-m-d H:i:s", filemtime($file))."</small></li>\n";
 		}
 
 		echo "</ul>\n";
@@ -132,7 +131,7 @@ class Utils {
 	 */
 	function pct($a, $b) {
 		if ($b == 0) {
-			return "N/A";
+			return 'N/A';
 		} else {
 			$res = (round(($a * 1000 / $b)) / 10);
 			return $res;
@@ -167,8 +166,8 @@ class Utils {
 	/**
 	 * Prints a <td> element with a numeric value.
 	 */
-	public static function td_num($num, $fmt_func, $bold = false, $attributes = null, $diff_mode = false) {
-		$class = Utils::td_class($num, $bold);
+	public static function td_num($num, $fmt_func, $bold = false, $diff_mode = false) {
+		$class = Utils::td_class($num, $bold, $diff_mode);
 
 		if (!empty($fmt_func)) {
 			$num = call_user_func($fmt_func, $num);
@@ -180,8 +179,8 @@ class Utils {
 	/**
 	 * Prints a <td> element with a pecentage.
 	 */
-	public static function td_pct($numer, $denom, $bold = false, $attributes = null, $diff_mode = false) {
-		$class = Utils::td_class($numer, $bold);
+	public static function td_pct($numer, $denom, $bold = false, $diff_mode = false) {
+		$class = Utils::td_class($numer, $bold, $diff_mode);
 
 		if ($denom == 0) {
 			$pct = "N/A%";

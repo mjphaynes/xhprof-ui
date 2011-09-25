@@ -28,9 +28,7 @@ class XHProf_UI {
 	public $pc_stats = array();
 
 	// Various total counts
-	public $totals   = null;
-	public $totals_1 = 0;
-	public $totals_2 = 0;
+	public $totals = array();
 
 	/*
 	* The subset of $possible_metrics that is present in the raw profile data.
@@ -74,7 +72,19 @@ class XHProf_UI {
 				$this->runs[] = new XHProf_UI\Run($this->dir, $namespace, $run_id);
 			}
 
-			if (count($this->runs) == 1) {
+			if ($compare) {
+				$this->runs = array(
+					$this->runs[0],
+					new XHProf_UI\Run($this->dir, $namespace, $compare)
+				);
+
+				if (($data1 = $this->runs[0]->get_data()) && ($data2 = $this->runs[1]->get_data())) {
+					$this->_setup_metrics($data2);
+
+					return new XHProf_UI\Report\Diff(&$this, $data1, $data2);
+				}
+				
+			} elseif (count($this->runs) == 1) {
 				if ($data = $this->runs[0]->get_data()) {
 					$this->_setup_metrics($data);
 
@@ -82,27 +92,15 @@ class XHProf_UI {
 				}
 
 			} else {
-				// $wts = strlen($wts) > 0 ? explode(',', $wts) : null;
-				// 
-				// $data = xhprof_aggregate_runs($xhprof_runs_impl, $runs_array, $wts_array, $source, false);
-				// $xhprof_data = $data['raw'];
-				// $description = $data['description'];
+				$wts = strlen($wts) > 0 ? explode(',', $wts) : null;
+
+				if ($data = Compute::aggregate_runs(&$this, $this->runs, $wts)) {
+					$this->_setup_metrics($data);
+
+					return new XHProf_UI\Report\Single(&$this, $data);
+				}
 			}
-
-
-		// diff report for two runs
-		} else if ($run1 && $run2) {
-			$run_data1 = $this->get_run($run1, $source);
-			$run_data2 = $this->get_run($run2, $source);
-			
-			$metrics = new XHProf_UI\Metrics($config, $run_data2, $fn, $sort, true);
-
-			// profiler_diff_report($url_params, $xhprof_data1, $description1, $xhprof_data2, $description2, $fn, $sort, $run1, $run2);
-			// init_metrics($xhprof_data2, $rep_fn, $sort, true);
-			// profiler_report($url_params,$rep_symbol, $sort, $run1, $run1_desc, $xhprof_data1,$run2,$run2_desc,$xhprof_data2);
-			return new XHProf_Report($config, $metrics, $this->_params, $fn, $sort, $run_data1, $run_data2);
 		}
-
 
 		return false;
 	}

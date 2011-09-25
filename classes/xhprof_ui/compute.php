@@ -18,8 +18,7 @@ class Compute {
 	*               (such as wall time, etc.).
 	*/
 	public static function flat_info(\XHProf_UI &$ui, $data) {
-
-		$ui->totals = array(
+		$totals = array(
 			'ct'      => 0,
 			'wt'      => 0,
 			'ut'      => 0,
@@ -35,7 +34,7 @@ class Compute {
 
 		/* total metric value is the metric value for 'main()' */
 		foreach ($ui->metrics as $metric) {
-			$ui->totals[$metric] = $symbol_tab['main()'][$metric];
+			$totals[$metric] = $symbol_tab['main()'][$metric];
 		}
 
 		/*
@@ -49,7 +48,7 @@ class Compute {
 			}
 			if ($ui->display_calls) {
 				/* keep track of total number of calls */
-				$ui->totals['ct'] += $info['ct'];
+				$totals['ct'] += $info['ct'];
 			}
 		}
 
@@ -66,6 +65,8 @@ class Compute {
 				}
 			}
 		}
+
+		$ui->totals[] = $totals;
 
 		return $symbol_tab;
 	}
@@ -148,8 +149,6 @@ class Compute {
 	/**
 	 * Given parent & child function name, composes the key
 	 * in the format present in the raw data.
-	 *
-	 * @author Kannan
 	 */
 	public static function build_parent_child_key($parent, $child) {
 		if ($parent) {
@@ -174,11 +173,8 @@ class Compute {
 	 * @param  array  array of function names
 	 *
 	 * @return array  Trimmed XHProf Report
-	 *
-	 * @author Kannan
 	 */
-	public function trim_run($data, $fn2keep) {
-
+	public static function trim_run($data, $fn2keep) {
 		// convert list of functions to a hash with function as the key
 		$fn_map = array_fill_keys($fn2keep, 1);
 
@@ -406,43 +402,35 @@ class Compute {
 	/**
 	 * Hierarchical diff:
 	 * Compute and return difference of two call graphs: Run2 - Run1.
-	 *
-	 * @author Kannan
 	 */
-	function xhprof_compute_diff($xhprof_data1, $xhprof_data2) {
-	  global $display_calls;
+	public static function diff(\XHProf_UI $ui, $raw_data1, $raw_data2) {
+		$delta = $raw_data2;
 
-	  // use the second run to decide what metrics we will do the diff on
-	  $metrics = xhprof_get_metrics($xhprof_data2);
+		foreach ($raw_data1 as $parent_child => $info) {
+			if (!isset($delta[$parent_child])) {
+				// this pc combination was not present in run1;
+				// initialize all values to zero.
+				if ($ui->display_calls) {
+					$delta[$parent_child] = array('ct' => 0);
+				} else {
+					$delta[$parent_child] = array();
+				}
 
-	  $xhprof_delta = $xhprof_data2;
+				foreach ($ui->metrics as $metric) {
+					$delta[$parent_child][$metric] = 0;
+				}
+			}
 
-	  foreach ($xhprof_data1 as $parent_child => $info) {
+			if ($ui->display_calls) {
+				$delta[$parent_child]['ct'] -= $info['ct'];
+			}
 
-	    if (!isset($xhprof_delta[$parent_child])) {
+			foreach ($ui->metrics as $metric) {
+				$delta[$parent_child][$metric] -= $info[$metric];
+			}
+		}
 
-	      // this pc combination was not present in run1;
-	      // initialize all values to zero.
-	      if ($display_calls) {
-	        $xhprof_delta[$parent_child] = array("ct" => 0);
-	      } else {
-	        $xhprof_delta[$parent_child] = array();
-	      }
-	      foreach ($metrics as $metric) {
-	        $xhprof_delta[$parent_child][$metric] = 0;
-	      }
-	    }
-
-	    if ($display_calls) {
-	      $xhprof_delta[$parent_child]["ct"] -= $info["ct"];
-	    }
-
-	    foreach ($metrics as $metric) {
-	      $xhprof_delta[$parent_child][$metric] -= $info[$metric];
-	    }
-	  }
-
-	  return $xhprof_delta;
+		return $delta;
 	}
 
 

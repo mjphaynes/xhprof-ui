@@ -17,15 +17,14 @@ class Single extends Driver {
 			$raw_data = Compute::trim_run($raw_data, array($ui->fn));
 		}
 
-		$flat_data = Compute::flat_info(&$ui, $raw_data);
+		$data = Compute::flat_info(&$ui, $raw_data);
 
-		if (!empty($ui->fn) && !isset($flat_data[$ui->fn])) {
+		if (!empty($ui->fn) && !isset($data[$ui->fn])) {
 			throw new \Exception('Function '.$ui->fn.' not found in XHProf run');
 		}
 		
-		$data = array();
-		foreach($flat_data as $fn => $info) {
-			$data[$fn] = $info + array('fn' => $fn);
+		foreach($data as $fn => &$info) {
+			$info = $info + array('fn' => $fn);
 		}
 		uasort($data, function($a, $b) use ($ui) {
 			return Utils::sort_cbk($a, $b, $ui);

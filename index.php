@@ -44,6 +44,7 @@ if (!(bool)extension_loaded('xhprof')) {
 	$xhprof_ui = new XHProf_UI(
 		array(
 			'run'       => array(XHProf_UI\Utils::STRING_PARAM, ''),
+			'compare'   => array(XHProf_UI\Utils::STRING_PARAM, ''),
 			'wts'       => array(XHProf_UI\Utils::STRING_PARAM, ''),
 			'fn'        => array(XHProf_UI\Utils::STRING_PARAM, ''),
 			'sort'      => array(XHProf_UI\Utils::STRING_PARAM, 'wt'),
