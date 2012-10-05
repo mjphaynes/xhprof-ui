@@ -80,4 +80,3 @@ foreach ($data_delta as $info) {
 ?>
 			</tbody>
 		</table>
-<?php
