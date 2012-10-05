@@ -58,4 +58,3 @@ foreach ($data as $info) {
 ?>
 			</tbody>
 		</table>
-<?php
