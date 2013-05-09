@@ -88,7 +88,7 @@ class XHProf_UI {
 				if ($data = $this->runs[0]->get_data()) {
 					$this->_setup_metrics($data);
 
-					return new XHProf_UI\Report\Single($this, $data);
+					return new XHProf_UI\Report\Single($this, $data, array());
 				}
 
 			} else {
@@ -97,7 +97,7 @@ class XHProf_UI {
 				if ($data = Compute::aggregate_runs($this, $this->runs, $wts)) {
 					$this->_setup_metrics($data);
 
-					return new XHProf_UI\Report\Single($this, $data);
+					return new XHProf_UI\Report\Single($this, $data, array());
 				}
 			}
 		}
