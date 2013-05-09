@@ -8,7 +8,7 @@ use XHProf_UI\Utils,
 
 class Single extends Driver {
 
-	public function __construct(\XHProf_UI &$ui, array $raw_data) {
+	public function __construct(\XHProf_UI &$ui, array $raw_data, array $raw_data2) {
 		// if we are reporting on a specific function, we can trim down
 		// the report(s) to just stuff that is relevant to this function.
 		// That way compute_flat_info()/compute_diff() etc. do not have
@@ -17,7 +17,7 @@ class Single extends Driver {
 			$raw_data = Compute::trim_run($raw_data, array($ui->fn));
 		}
 
-		$data = Compute::flat_info(&$ui, $raw_data);
+		$data = Compute::flat_info($ui, $raw_data);
 
 		if (!empty($ui->fn) && !isset($data[$ui->fn])) {
 			throw new \Exception('Function '.$ui->fn.' not found in XHProf run');
