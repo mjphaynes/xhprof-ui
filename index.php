@@ -1,5 +1,7 @@
 <?php
 define('XHPROF_ROOT', realpath(__DIR__));
+$parts = explode('index.php', $_SERVER['SCRIPT_URI']);
+define('XHPROF_BASE', $parts[0]);
 
 include XHPROF_ROOT.'/views/header.php';
 
