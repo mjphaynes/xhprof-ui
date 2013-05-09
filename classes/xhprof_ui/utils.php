@@ -145,7 +145,7 @@ class Utils {
 	 * represent improvement from run1 to run2. We use green to display those deltas,
 	 * and red for regression deltas.
 	 */
-	function td_class($num, $bold, $diff_mode = false) {
+	static function td_class($num, $bold, $diff_mode = false) {
 		if ($bold) {
 			if ($diff_mode) {
 				if ($num <= 0) {

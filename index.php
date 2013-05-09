@@ -1,5 +1,7 @@
 <?php
 define('XHPROF_ROOT', realpath(__DIR__));
+$parts = explode('index.php', $_SERVER['SCRIPT_URI']);
+define('XHPROF_BASE', $parts[0]);
 
 include XHPROF_ROOT.'/views/header.php';
 
@@ -61,10 +63,9 @@ if (!(bool)extension_loaded('xhprof')) {
 		echo "No XHProf runs specified in the URL.";
 
 		XHProf_UI\Utils::list_runs($xhprof_ui->dir);
+	} else {
+		$xhprof_report->render();
 	}
-
-
-	$xhprof_report->render();
 
 }
 include XHPROF_ROOT.'/views/footer.php';

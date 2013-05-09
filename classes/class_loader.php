@@ -110,13 +110,12 @@ class Class_Loader {
      * @return boolean TRUE if the class has been successfully loaded, FALSE otherwise.
      */
     public function loadClass($class) {
-		
         if ($this->namespace !== null && strpos($class.(strpos($class, $this->namespaceSeparator) ? '' : $this->namespaceSeparator), $this->namespace.$this->namespaceSeparator) !== 0) {
             return false;
         }
 
         if (file_exists($file = (($this->includePath !== null ? $this->includePath . DIRECTORY_SEPARATOR : '')
-               . str_replace($this->namespaceSeparator, DIRECTORY_SEPARATOR, $class)
+               . str_replace($this->namespaceSeparator, DIRECTORY_SEPARATOR, strtolower($class))
                . $this->fileExtension))) {
 	
         	require $file;

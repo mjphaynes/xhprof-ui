@@ -81,23 +81,23 @@ class XHProf_UI {
 				if (($data1 = $this->runs[0]->get_data()) && ($data2 = $this->runs[1]->get_data())) {
 					$this->_setup_metrics($data2);
 
-					return new XHProf_UI\Report\Diff(&$this, $data1, $data2);
+					return new XHProf_UI\Report\Diff($this, $data1, $data2);
 				}
 				
 			} elseif (count($this->runs) == 1) {
 				if ($data = $this->runs[0]->get_data()) {
 					$this->_setup_metrics($data);
 
-					return new XHProf_UI\Report\Single(&$this, $data);
+					return new XHProf_UI\Report\Single($this, $data, array());
 				}
 
 			} else {
 				$wts = strlen($wts) > 0 ? explode(',', $wts) : null;
 
-				if ($data = Compute::aggregate_runs(&$this, $this->runs, $wts)) {
+				if ($data = Compute::aggregate_runs($this, $this->runs, $wts)) {
 					$this->_setup_metrics($data);
 
-					return new XHProf_UI\Report\Single(&$this, $data);
+					return new XHProf_UI\Report\Single($this, $data, array());
 				}
 			}
 		}
