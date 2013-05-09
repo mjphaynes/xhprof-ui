@@ -61,10 +61,9 @@ if (!(bool)extension_loaded('xhprof')) {
 		echo "No XHProf runs specified in the URL.";
 
 		XHProf_UI\Utils::list_runs($xhprof_ui->dir);
+	} else {
+		$xhprof_report->render();
 	}
-
-
-	$xhprof_report->render();
 
 }
 include XHPROF_ROOT.'/views/footer.php';
